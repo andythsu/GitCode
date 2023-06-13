@@ -1,9 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
+const clientId = "f0931287bb5d9d34de53";
+const clientSecret = "e4443e0ceb8e72e019d86d70624379b42b661c2b";
+
+function authWithGithub(setAccessCode: React.Dispatch<React.SetStateAction<string | undefined>>) {
+  chrome.identity.launchWebAuthFlow({
+    url: `https://github.com/login/oauth/authorize?client_id=${clientId}`,
+    interactive: true,
+  }, (responseUrl?: string) => {
+    if (responseUrl) {
+      parseAccessCode(setAccessCode, responseUrl);
+    }
+  });
+}
+
+function parseAccessCode(setAccessCode: React.Dispatch<React.SetStateAction<string | undefined>>, responseUrl: string) {
+  const url = new URL(responseUrl);
+  const code = url.searchParams.get("code");
+  if (code) {
+    setAccessCode(code);
+  }
+}
+
+
 const Popup = () => {
   const [count, setCount] = useState(0);
   const [currentURL, setCurrentURL] = useState<string>();
+  const [accessCode, setAccessCode] = useState<string>();;
 
   useEffect(() => {
     chrome.action.setBadgeText({ text: count.toString() });
@@ -15,36 +39,13 @@ const Popup = () => {
     });
   }, []);
 
-  const changeBackground = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const tab = tabs[0];
-      if (tab.id) {
-        chrome.tabs.sendMessage(
-          tab.id,
-          {
-            color: "#555555",
-          },
-          (msg) => {
-            console.log("result message:", msg);
-          }
-        );
-      }
-    });
-  };
+  useEffect(() => {
+    chrome.runtime.sendMessage(`accessCode: ${accessCode}`);    
+  }, [accessCode]);
 
   return (
     <>
-      <ul style={{ minWidth: "700px" }}>
-        <li>Current URL: {currentURL}</li>
-        <li>Current Time: {new Date().toLocaleTimeString()}</li>
-      </ul>
-      <button
-        onClick={() => setCount(count + 1)}
-        style={{ marginRight: "5px" }}
-      >
-        count up
-      </button>
-      <button onClick={changeBackground}>change background</button>
+      <button onClick={() => authWithGithub(setAccessCode)}>Authenticate with Github</button>
     </>
   );
 };

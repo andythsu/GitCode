@@ -10,6 +10,7 @@ module.exports = {
       content_script: path.join(srcDir, 'content_script.tsx'),
       Auth: path.join(srcDir, 'Auth.ts'),
       Welcome: path.join(srcDir, 'Welcome.tsx'),
+      config: path.join(srcDir, 'config.json')
     },
     output: {
         path: path.join(__dirname, "../dist/js"),

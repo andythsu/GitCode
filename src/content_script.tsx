@@ -1,6 +1,8 @@
-import config from './config.json';
+import axios from 'axios';
+import config from '../config.json';
+import { getFromLocalStorage } from './util';
 
-const getElementByQuerySelector = (query: string): Promise<NodeListOf<Element>> => {
+const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
     return new Promise((resolve, reject) => {
         let count = 0;
         const EXPIRY_IN_MS = config.FIND_ELEMENT_EXPIRY_IN_MS;
@@ -19,7 +21,7 @@ const getElementByQuerySelector = (query: string): Promise<NodeListOf<Element>> 
     });
 }
 
-const getElementByClassName = (query: string): Promise<HTMLCollectionOf<Element>> => {
+const getElementByClassNameWithTimeout = (query: string): Promise<HTMLCollectionOf<Element>> => {
     return new Promise((resolve, reject) => {
         let count = 0;
         const EXPIRY_IN_MS = config.FIND_ELEMENT_EXPIRY_IN_MS;
@@ -38,13 +40,49 @@ const getElementByClassName = (query: string): Promise<HTMLCollectionOf<Element>
     });
 }
 
+const getCodeFromEditor = (codeEditor: Element): string => {
+    const codeLines: HTMLCollectionOf<HTMLPreElement> = codeEditor.getElementsByTagName("pre");
+    let code: string = "";
+    for(let i=0; i<codeLines.length; i++){
+        code += codeLines[i].innerText;
+        code += "\n";
+    }
+    return code;
+}
+
+const uploadToGithub = async (code: string) => {
+    const data = JSON.stringify({
+        "message": "txt file",
+        "content": `${Buffer.from(code, "utf8").toString("base64")}`
+    });
+
+    const accessToken: string = (await getFromLocalStorage("access_token"));
+    console.log("gh access token", accessToken);
+
+    const config = {
+        method: "put",
+        url: "https://api.github.com/repos/andythsu/andythsu.github.io/contents/test.txt",
+        headers: {
+            "Accept": "application/vnd.github+json",
+            "Authorization": `Bearer ${accessToken}`,
+        },
+        data: data
+    };
+
+    // const result = await axios(config);
+    // console.log(result);
+}
+
 (async () => {
     try {
-        const submitBtn = (await getElementByQuerySelector(`[data-cy="submit-code-btn"]`))[0];
+        const submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-cy="submit-code-btn"]`))[0];
         submitBtn.addEventListener("click", async () => {
             try {
-                const successTag = (await getElementByClassName("marked_as_success"))[0];
-                console.log(successTag);
+                const successTag: HTMLCollectionOf<Element> = (await getElementByClassNameWithTimeout("marked_as_success"));
+                if(!successTag[0]) throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
+                const codeEditor: Element = document.getElementsByClassName("CodeMirror-code")[0];
+                const code = getCodeFromEditor(codeEditor);
+                await uploadToGithub(code);
             }catch(e){
                 console.error(e); 
             }
@@ -53,13 +91,3 @@ const getElementByClassName = (query: string): Promise<HTMLCollectionOf<Element>
         console.error(e);
     }
 })();
-
-
-// window.addEventListener("load", (event) => {
-//     const submitBtn = document.querySelectorAll('[data-cy="submit-code-btn"]')[0];
-
-//     submitBtn.addEventListener('click', () => {
-//         console.log("sss");
-    
-//     });    
-// });

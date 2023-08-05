@@ -4,12 +4,13 @@ class Auth {
     private clientId = "f0931287bb5d9d34de53";
     private clientSecret = "e4443e0ceb8e72e019d86d70624379b42b661c2b";
     private accessToken = "";
+    private scopes = ["repo"];
     
     constructor(){
         // init access token
-        getFromLocalStorage("access_token").then((data) => {
-            if(data.access_token){
-                this.accessToken = data.access_token;
+        getFromLocalStorage("access_token").then((data: string) => {
+            if(data){
+                this.accessToken = data;
             }else{
                 console.log("access_token not set in storage");
             }
@@ -18,7 +19,7 @@ class Auth {
 
     authWithGithub(): void {
         chrome.identity.launchWebAuthFlow({
-            url: `https://github.com/login/oauth/authorize?client_id=${this.clientId}`,
+            url: `https://github.com/login/oauth/authorize?scope=${this.scopes.join("%20")}&client_id=${this.clientId}`,
             interactive: true,
         }, (responseUrl?: string) => {
             if (responseUrl) {

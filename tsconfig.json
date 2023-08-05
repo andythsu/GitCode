@@ -7,10 +7,10 @@
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "sourceMap": false,
-        "rootDir": "src",
+        // "rootDir": "src",
         "outDir": "dist/js",
         "noEmitOnError": true,
         "jsx": "react",
-        "typeRoots": [ "node_modules/@types" ]
+        "typeRoots": [ "node_modules/@types", "./src/@types" ]
     }
 }

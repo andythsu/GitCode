@@ -8,9 +8,6 @@ module.exports = {
       popup: path.join(srcDir, 'popup.tsx'),
       background: path.join(srcDir, 'background.ts'),
       content_script: path.join(srcDir, 'content_script.tsx'),
-      Auth: path.join(srcDir, 'Auth.ts'),
-      Welcome: path.join(srcDir, 'Welcome.tsx'),
-      config: path.join(srcDir, 'config.json')
     },
     output: {
         path: path.join(__dirname, "../dist/js"),
@@ -35,8 +32,14 @@ module.exports = {
     },
     resolve: {
         extensions: [".ts", ".tsx", ".js"],
+        fallback: {
+            "buffer": require.resolve("buffer"),
+        }
     },
     plugins: [
+        new webpack.ProvidePlugin({
+            Buffer: ["buffer", "Buffer"],
+        }),
         new CopyPlugin({
             patterns: [{ from: ".", to: "../", context: "public" }],
             options: {},

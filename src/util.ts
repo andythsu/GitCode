@@ -1,3 +1,4 @@
+import axios from "axios";
 import { StorageKey } from "./@types/StorageKey";
 
 export const saveToLocalStorage = (key: StorageKey, val: any): void => {
@@ -18,27 +19,22 @@ export const removeFromLocalStorage = async (key: StorageKey): Promise<void> => 
     await chrome.storage.local.remove(key);
 }
 
-export const uploadToGithub = async (code: string) => {
+export const uploadToGithub = async (code: string): Promise<Response> => {
     const data = JSON.stringify({
         "message": "txt file",
         "content": `${Buffer.from(code, "utf8").toString("base64")}`
     });
-
     const accessToken: string = (await getFromLocalStorage("access_token"));
     console.log("gh access token", accessToken);
-
-    const config = {
-        method: "put",
-        url: "https://api.github.com/repos/andythsu/andythsu.github.io/contents/test.txt",
+    const res = await fetch("https://api.github.com/repos/andythsu/andythsu.github.io/contents/test.txt", {
+        method: "PUT",
         headers: {
-            "Accept": "application/vnd.github+json",
-            "Authorization": `Bearer ${accessToken}`,
+          "Accept": "application/vnd.github+json",
+          "Authorization": `Bearer ${accessToken}`,
         },
-        data: data
-    };
-
-    // const result = await axios(config);
-    // console.log(result);
+        body: data
+    });
+    return res;
 }
 
 export const getFromPageLocalStorage = async (key: string, tabId: number): Promise<string | null> => {

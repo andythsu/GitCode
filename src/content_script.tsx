@@ -1,5 +1,6 @@
-import axios from 'axios';
 import config from '../config.json';
+import { Message } from './@types/Message';
+import { MessagePayload } from './@types/Payload';
 
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
     return new Promise((resolve, reject) => {
@@ -39,6 +40,11 @@ const getElementByClassNameWithTimeout = (query: string): Promise<HTMLCollection
     });
 }
 
+/**
+ * gets the code from UI.
+ * @deprecated Marking this deprecated since we can get the code from localStroage
+ * @returns Promise<string>
+ */
 const getCodeFromUI = (): Promise<string> => {
     const codeEditor: Element = document.getElementsByClassName("CodeMirror-code")[0];
     const codeLines: HTMLCollectionOf<HTMLPreElement> = codeEditor.getElementsByTagName("pre");
@@ -50,9 +56,17 @@ const getCodeFromUI = (): Promise<string> => {
     return Promise.resolve(code);
 }
 
-const getCodeFromLocalStorage = async (): Promise<string> => {
-    await chrome.runtime.sendMessage("getCodeFromLocalStorage");
-    return Promise.resolve("");
+const getQuestionNum = async (): Promise<number> => {
+    const questionTitle = (await getElementByQuerySelectorWithTimeout(`[data-cy="question-title"]`))[0] as HTMLDivElement;
+    const innterText = questionTitle.innerText;
+    const questionNumStr = innterText.split(".")[0];
+    return parseInt(questionNumStr);
+}
+
+const uploadCode = async (): Promise<void> => {
+    const questionNum = await getQuestionNum();
+    const payload: string = JSON.stringify({ questionNum } as MessagePayload.UploadCode);
+    await chrome.runtime.sendMessage<Message, any>({type: 'uploadCode', payload});
 }
 
 (async () => {
@@ -62,9 +76,7 @@ const getCodeFromLocalStorage = async (): Promise<string> => {
             try {
                 const successTag: HTMLCollectionOf<Element> = (await getElementByClassNameWithTimeout("marked_as_success"));
                 if(!successTag[0]) throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
-                // const code = getCodeFromUI();
-                const code = await getCodeFromLocalStorage();
-                // await uploadToGithub(code);
+                await uploadCode();
             }catch(e){
                 console.error(e); 
             }

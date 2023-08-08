@@ -1,6 +1,5 @@
 import axios from 'axios';
 import config from '../config.json';
-import { getFromLocalStorage } from './util';
 
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
     return new Promise((resolve, reject) => {
@@ -40,37 +39,20 @@ const getElementByClassNameWithTimeout = (query: string): Promise<HTMLCollection
     });
 }
 
-const getCodeFromEditor = (codeEditor: Element): string => {
+const getCodeFromUI = (): Promise<string> => {
+    const codeEditor: Element = document.getElementsByClassName("CodeMirror-code")[0];
     const codeLines: HTMLCollectionOf<HTMLPreElement> = codeEditor.getElementsByTagName("pre");
     let code: string = "";
     for(let i=0; i<codeLines.length; i++){
         code += codeLines[i].innerText;
         code += "\n";
     }
-    return code;
+    return Promise.resolve(code);
 }
 
-const uploadToGithub = async (code: string) => {
-    const data = JSON.stringify({
-        "message": "txt file",
-        "content": `${Buffer.from(code, "utf8").toString("base64")}`
-    });
-
-    const accessToken: string = (await getFromLocalStorage("access_token"));
-    console.log("gh access token", accessToken);
-
-    const config = {
-        method: "put",
-        url: "https://api.github.com/repos/andythsu/andythsu.github.io/contents/test.txt",
-        headers: {
-            "Accept": "application/vnd.github+json",
-            "Authorization": `Bearer ${accessToken}`,
-        },
-        data: data
-    };
-
-    // const result = await axios(config);
-    // console.log(result);
+const getCodeFromLocalStorage = async (): Promise<string> => {
+    await chrome.runtime.sendMessage("getCodeFromLocalStorage");
+    return Promise.resolve("");
 }
 
 (async () => {
@@ -80,9 +62,9 @@ const uploadToGithub = async (code: string) => {
             try {
                 const successTag: HTMLCollectionOf<Element> = (await getElementByClassNameWithTimeout("marked_as_success"));
                 if(!successTag[0]) throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
-                const codeEditor: Element = document.getElementsByClassName("CodeMirror-code")[0];
-                const code = getCodeFromEditor(codeEditor);
-                await uploadToGithub(code);
+                // const code = getCodeFromUI();
+                const code = await getCodeFromLocalStorage();
+                // await uploadToGithub(code);
             }catch(e){
                 console.error(e); 
             }

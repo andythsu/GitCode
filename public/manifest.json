@@ -19,7 +19,9 @@
   },
   "permissions": [
     "storage",
-    "identity"
+    "identity",
+    "tabs",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"

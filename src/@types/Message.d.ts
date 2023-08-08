@@ -1,4 +1,4 @@
 export interface Message {
-    type: string;
-    payload: string;
+	type: string;
+	payload: string;
 }

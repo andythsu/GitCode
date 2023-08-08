@@ -7,35 +7,34 @@ import { getFromPageLocalStorage } from "./util";
 const auth = new Auth();
 
 type PopupProps = {
-  auth: Auth;
+	auth: Auth;
 }
 
-
 const Popup = ({auth}: PopupProps) => {
-  useEffect(() => {
-    const fn = async () => {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      const res = await getFromPageLocalStorage('GLOBAL_DATA:value', tab.id!);
-      console.log(res);
-    };
-    fn().catch(e => console.log);
-  }, [])
-  const accessToken = auth.getAccessToken();
-  return (
-    <>
-      {
-        accessToken
-        ? <Welcome></Welcome>
-        : <button onClick={() => auth.authWithGithub()}>Authenticate with Github</button>
-      }
-    </>
-  );
+	useEffect(() => {
+		const fn = async () => {
+			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+			const res = await getFromPageLocalStorage('GLOBAL_DATA:value', tab.id!);
+			console.log(res);
+		};
+		fn().catch(e => console.log);
+	}, [])
+	const accessToken = auth.getAccessToken();
+	return (
+		<>
+		{
+			accessToken
+			? <Welcome></Welcome>
+			: <button onClick={() => auth.authWithGithub()}>Authenticate with Github</button>
+		}
+		</>
+		);
 };
-
+	
 const root = createRoot(document.getElementById("root")!);
-
+	
 root.render(
-  <React.StrictMode>
-    <Popup auth={auth}/>
-  </React.StrictMode>
+	<React.StrictMode>
+		<Popup auth={auth}/>
+	</React.StrictMode>
 );

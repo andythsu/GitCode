@@ -8,7 +8,7 @@ class Auth {
 
 	constructor() {
 		// init access token
-		getFromLocalStorage('access_token').then((data: string) => {
+		getFromLocalStorage('access_token').then((data: string | null) => {
 			if (data) {
 				this.accessToken = data;
 			} else {

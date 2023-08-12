@@ -1,11 +1,11 @@
-import { Leetcode } from "./@types/Leetcode";
+import { Leetcode } from './@types/Leetcode';
 
 export class LCProfile {
 	private profile: Leetcode.Profile;
-	constructor(rawJSON: string){
+	constructor(rawJSON: string) {
 		this.profile = JSON.parse(rawJSON);
 	}
-	
+
 	getUserStatus(): Leetcode.UserStatus {
 		return this.profile.userStatus;
 	}

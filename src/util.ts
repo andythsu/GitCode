@@ -10,8 +10,9 @@ export const saveToLocalStorage = (key: StorageKey, val: any): void => {
 	});
 };
 
-export const getFromLocalStorage = async (key: StorageKey): Promise<string> => {
+export const getFromLocalStorage = async (key: StorageKey): Promise<string | null> => {
 	const val = await chrome.storage.local.get(key);
+	if (!val[key]) return null;
 	return val[key] as string;
 };
 
@@ -24,7 +25,9 @@ export const uploadToGithub = async (code: string): Promise<Response> => {
 		message: 'txt file',
 		content: `${Buffer.from(code, 'utf8').toString('base64')}`
 	});
-	const accessToken: string = await getFromLocalStorage('access_token');
+	const accessToken: string | null = await getFromLocalStorage('access_token');
+	if (!accessToken) throw new Error(`Access token not found`);
+
 	console.log('gh access token', accessToken);
 	const res = await fetch(
 		'https://api.github.com/repos/andythsu/andythsu.github.io/contents/test.txt',

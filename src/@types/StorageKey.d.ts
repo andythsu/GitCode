@@ -1,1 +1,1 @@
-export type StorageKey = 'access_token';
+export type StorageKey = 'access_token' | 'bound_repo';

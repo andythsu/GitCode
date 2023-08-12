@@ -1,4 +1,4 @@
-export namespace Leetcode {
+export namespace LC {
 	interface Profile {
 		userStatus: UserStatus;
 	}

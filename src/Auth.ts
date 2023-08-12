@@ -17,20 +17,23 @@ class Auth {
 		});
 	}
 
-	authWithGithub(): void {
-		chrome.identity.launchWebAuthFlow(
-			{
-				url: `https://github.com/login/oauth/authorize?scope=${this.scopes.join('%20')}&client_id=${
-					this.clientId
-				}`,
-				interactive: true
-			},
-			(responseUrl?: string) => {
-				if (responseUrl) {
-					this.setToken(responseUrl);
+	authWithGithub(): Promise<void> {
+		return new Promise((resolve, reject) => {
+			chrome.identity.launchWebAuthFlow(
+				{
+					url: `https://github.com/login/oauth/authorize?scope=${this.scopes.join(
+						'%20'
+					)}&client_id=${this.clientId}`,
+					interactive: true
+				},
+				(responseUrl?: string) => {
+					if (responseUrl) {
+						this.setToken(responseUrl);
+						resolve();
+					}
 				}
-			}
-		);
+			);
+		});
 	}
 
 	async setToken(responseUrl: string): Promise<void> {
@@ -58,7 +61,7 @@ class Auth {
 					throw new Error(`response.status is not 200. ${response}`);
 				}
 			} catch (e) {
-				console.error(e);
+				throw e;
 			}
 		}
 	}

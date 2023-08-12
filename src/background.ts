@@ -36,9 +36,11 @@ const getRawCodeFromLocalStroage = async (questionNum: number): Promise<string> 
 };
 
 const uploadCode = async (payload: string): Promise<void> => {
-	const questionNum = (JSON.parse(payload) as MessagePayload.UploadCode).questionNum;
+	const { questionNum, questionTitle } = JSON.parse(payload) as MessagePayload.UploadCode;
 	const rawCode = await getRawCodeFromLocalStroage(questionNum);
-	const res = await uploadToGithub(JSON.parse(rawCode));
+	const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+	const globalLang = JSON.parse((await getFromPageLocalStorage('global_lang', tab.id!))!);
+	const res = await uploadToGithub(JSON.parse(rawCode), questionNum, questionTitle, globalLang);
 	console.log('upload to github result', res);
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Auth from './Auth';
 import { Welcome } from './Components/Welcome';
@@ -7,29 +7,47 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import './popup.css';
-
-const auth = new Auth();
+import { GHUser } from './GHUser';
+import { Button } from '@mui/material';
+import { removeFromLocalStorage } from './util';
 
 type PopupProps = {
 	auth: Auth;
+	ghUser: GHUser;
 };
 
-const Popup = ({ auth }: PopupProps) => {
-	// useEffect(() => {
-	// 	const fn = async () => {
-	// 		const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-	// 		const res = await getFromPageLocalStorage('GLOBAL_DATA:value', tab.id!);
-	// 		console.log(res);
-	// 	};
-	// 	fn().catch(e => console.log);
-	// }, [])
-	const accessToken = auth.getAccessToken();
+const authWithGithub = async (
+	auth: Auth,
+	setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>
+): Promise<void> => {
+	await auth.authWithGithub();
+	setLoggedIn(true);
+};
+
+const onLogOut = async (
+	setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>
+): Promise<void> => {
+	await removeFromLocalStorage('access_token');
+	setLoggedIn(false);
+};
+
+const Popup = ({ auth, ghUser }: PopupProps) => {
+	const [loggedIn, setLoggedIn] = useState(false);
+	useEffect(() => {
+		const accessToken = auth.getAccessToken();
+		ghUser.init(accessToken);
+		if (accessToken) {
+			setLoggedIn(true);
+		}
+	}, []);
 	return (
 		<>
-			{accessToken ? (
-				<Welcome></Welcome>
+			{loggedIn ? (
+				<Welcome ghUser={ghUser} onLogOut={async () => await onLogOut(setLoggedIn)}></Welcome>
 			) : (
-				<button onClick={() => auth.authWithGithub()}>Authenticate with Github</button>
+				<Button onClick={async () => await authWithGithub(auth, setLoggedIn)}>
+					Authenticate with Github
+				</Button>
 			)}
 		</>
 	);
@@ -37,8 +55,11 @@ const Popup = ({ auth }: PopupProps) => {
 
 const root = createRoot(document.getElementById('root')!);
 
+const auth = new Auth();
+const ghUser = new GHUser();
+
 root.render(
 	<React.StrictMode>
-		<Popup auth={auth} />
+		<Popup auth={auth} ghUser={ghUser} />
 	</React.StrictMode>
 );

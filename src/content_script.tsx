@@ -64,18 +64,29 @@ const getCodeFromUI = (): Promise<string> => {
 	return Promise.resolve(code);
 };
 
-const getQuestionNum = async (): Promise<number> => {
-	const questionTitle = (
+const getQuestionData = async (): Promise<{
+	questionNum: number;
+	questionTitle: string;
+}> => {
+	const questionTitleElem = (
 		await getElementByQuerySelectorWithTimeout(`[data-cy="question-title"]`)
 	)[0] as HTMLDivElement;
-	const innterText = questionTitle.innerText;
+	const innterText = questionTitleElem.innerText;
 	const questionNumStr = innterText.split('.')[0];
-	return parseInt(questionNumStr);
+	const questionTitle = innterText.split('.')[1];
+	// return parseInt(questionNumStr);
+	return {
+		questionNum: parseInt(questionNumStr),
+		questionTitle
+	};
 };
 
 const uploadCode = async (): Promise<void> => {
-	const questionNum = await getQuestionNum();
-	const payload: string = JSON.stringify({ questionNum } as MessagePayload.UploadCode);
+	const { questionNum, questionTitle } = await getQuestionData();
+	const payload: string = JSON.stringify({
+		questionNum,
+		questionTitle
+	} as MessagePayload.UploadCode);
 	await chrome.runtime.sendMessage<Message, any>({ type: 'uploadCode', payload });
 };
 

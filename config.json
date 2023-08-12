@@ -1,4 +1,7 @@
 {
 	"FIND_ELEMENT_EXPIRY_IN_MS": 150,
-	"FIND_ELEMENT_ALLOWED_RETRIES": 20
+	"FIND_ELEMENT_ALLOWED_RETRIES": 20,
+	"GithubAPI": {
+		"host": "https://api.github.com"
+	}
 }

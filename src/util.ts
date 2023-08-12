@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { Github } from './@types/Github';
 import { StorageKey } from './@types/StorageKey';
 
 export const saveToLocalStorage = (key: StorageKey, val: any): void => {
@@ -20,24 +20,56 @@ export const removeFromLocalStorage = async (key: StorageKey): Promise<void> => 
 	await chrome.storage.local.remove(key);
 };
 
-export const uploadToGithub = async (code: string): Promise<Response> => {
-	const data = JSON.stringify({
-		message: 'txt file',
-		content: `${Buffer.from(code, 'utf8').toString('base64')}`
-	});
+export const uploadToGithub = async (
+	code: string,
+	questionNum: number,
+	questionTitle: string,
+	lang: string
+): Promise<Response> => {
 	const accessToken: string | null = await getFromLocalStorage('access_token');
-	if (!accessToken) throw new Error(`Access token not found`);
+	const ghUsername: string | null = await getFromLocalStorage('gh_username');
+	const boundRepo: string | null = await getFromLocalStorage('bound_repo');
 
-	console.log('gh access token', accessToken);
+	if (!accessToken) throw new Error(`Access token not found`);
+	if (!ghUsername) throw new Error(`Github username not found`);
+	if (!boundRepo) throw new Error(`Bound repo not found`);
+
+	const path = `${questionNum}.${questionTitle}.${lang}`;
+
+	// check if file exists already. If we are updating the file, we need SHA of the file
+	const fileExistsRes = await fetch(
+		`https://api.github.com/repos/${ghUsername}/${boundRepo}/contents/${path}`,
+		{
+			method: 'GET',
+			headers: {
+				Accept: 'application/vnd.github+json',
+				Authorization: `Bearer ${accessToken}`
+			}
+		}
+	);
+
+	let data: { message: string; content: string; sha?: string } = {
+		message: 'commit',
+		content: `${Buffer.from(code, 'utf8').toString('base64')}`
+	};
+
+	if (fileExistsRes.status === 200) {
+		const content: Github.RepoContent = await fileExistsRes.json();
+		data = {
+			...data,
+			sha: content.sha
+		};
+	}
+
 	const res = await fetch(
-		'https://api.github.com/repos/andythsu/andythsu.github.io/contents/test.txt',
+		`https://api.github.com/repos/${ghUsername}/${boundRepo}/contents/${path}`,
 		{
 			method: 'PUT',
 			headers: {
 				Accept: 'application/vnd.github+json',
 				Authorization: `Bearer ${accessToken}`
 			},
-			body: data
+			body: JSON.stringify(data)
 		}
 	);
 	return res;

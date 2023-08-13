@@ -40,6 +40,7 @@ export const Stats = ({ lcProfile }: StatsProps) => {
 
 	useEffect(() => {
 		if (!lcProfile) return;
+		console.log(lcProfile);
 		saveToLocalStorage('lc_username', lcProfile.userStatus.username);
 		const query = {
 			operationName: 'getUserProfile',
@@ -71,7 +72,7 @@ export const Stats = ({ lcProfile }: StatsProps) => {
 	return (
 		<>
 			<p style={{ fontSize: '16px' }}>Currently logged in as {lcUsername} on Leetcode.</p>
-			<p style={{ fontSize: '16px' }}>You have solved:</p>
+			<p style={{ fontSize: '14px' }}>You have solved:</p>
 			<Grid container spacing={2}>
 				<Grid item xs={4}>
 					<Item>

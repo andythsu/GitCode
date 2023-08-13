@@ -5,4 +5,5 @@ export type StorageKey =
 	| 'numOfEasyQuestions'
 	| 'numOfMediumQuestions'
 	| 'numOfHardQuestions'
-	| 'lc_username';
+	| 'lc_username'
+	| 'lc_profile';

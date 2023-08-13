@@ -92,17 +92,29 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 			})
 			.catch(console.error);
 
-		const getLcProfile = async (): Promise<LC.Profile> => {
+		const getLcProfileFromPage = async (): Promise<string | null> => {
 			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-			const lcProfile: LC.Profile = JSON.parse(
-				(await getFromPageLocalStorage('GLOBAL_DATA:value', tab.id!))!
-			);
+			const lcProfile: string | null = await getFromPageLocalStorage('GLOBAL_DATA:value', tab.id!);
+			if (lcProfile) {
+				saveToLocalStorage('lc_profile', lcProfile);
+			}
 			return lcProfile;
 		};
 
-		getLcProfile()
+		getLcProfileFromPage()
 			.then((profile) => {
-				setLcProfile(profile);
+				if (profile) {
+					setLcProfile(JSON.parse(profile) as LC.Profile);
+				} else {
+					// try extension's local storage if current page doesn't have lc_profile
+					getFromLocalStorage('lc_profile')
+						.then((profile) => {
+							if (profile) {
+								setLcProfile(JSON.parse(profile) as LC.Profile);
+							}
+						})
+						.catch(console.error);
+				}
 			})
 			.catch(console.error);
 	}, []);

@@ -5,7 +5,8 @@ export const repoExists = async (repoName: string, ghUser: GHUser) => {
 	const ghUsername = ghUser.getUsername();
 	const reqConfig: AxiosRequestConfig = {
 		headers: {
-			Authorization: `Bearer ${ghUser.getAccessToken()}`
+			Authorization: `Bearer ${ghUser.getAccessToken()}`,
+			Accept: 'application/vnd.github+json'
 		}
 	};
 	try {

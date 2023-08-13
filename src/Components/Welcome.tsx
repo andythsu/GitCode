@@ -122,7 +122,7 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 	return (
 		<>
 			<Typography variant="h5">Welcome!</Typography>
-			{repo != '' && (
+			{repo !== '' ? (
 				<>
 					<Typography variant="subtitle1">
 						Currently bound repo: {ghUsername == '' ? repo : `${ghUsername}/${repo}`}
@@ -131,8 +131,7 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 						Re-bind repo
 					</Button>
 				</>
-			)}
-			{repo == '' && (
+			) : (
 				<>
 					<Typography variant="subtitle2">Name of the repo you want to bind to</Typography>
 					<TextField size="small" inputRef={bindRepoInputRef} label="Name" />

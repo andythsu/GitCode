@@ -7,11 +7,10 @@ class Auth {
 	private scopes = ['repo'];
 
 	async authWithGithub(): Promise<void> {
-		const redirectUrl = process.env.GITHUB_AUTH_REDIRECT_URL;
 		const responseUrl = await chrome.identity.launchWebAuthFlow({
-			url: `https://github.com/login/oauth/authorize?redirect_uri=${redirectUrl}/*&scope=${this.scopes.join(
-				'%20'
-			)}&client_id=${this.clientId}`,
+			url: `https://github.com/login/oauth/authorize?scope=${this.scopes.join('%20')}&client_id=${
+				this.clientId
+			}`,
 			interactive: true
 		});
 		if (responseUrl) {

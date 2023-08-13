@@ -1,17 +1,49 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from '../util';
+import {
+	getFromLocalStorage,
+	getFromPageLocalStorage,
+	removeFromLocalStorage,
+	saveToLocalStorage
+} from '../util';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { GHUser } from '../GHUser';
 import { createRepo, repoExists } from '../repo-util';
+import { Typography, styled } from '@mui/material';
+import { Stats } from './Stats';
+import { LC } from '../@types/Leetcode';
 
 type WelcomeProps = {
 	ghUser: GHUser;
 	onLogOut: () => void;
 };
 
+// const CssTextField = styled(TextField)({
+// 	'& label.Mui-focused': {
+// 		color: '#A0AAB4'
+// 	},
+// 	'& .MuiInput-underline:after': {
+// 		borderBottomColor: '#B2BAC2'
+// 	},
+// 	'& .MuiOutlinedInput-root': {
+// 		'& fieldset': {
+// 			borderColor: '#E0E3E7'
+// 		},
+// 		'&:hover fieldset': {
+// 			borderColor: '#B2BAC2'
+// 		},
+// 		'&.Mui-focused fieldset': {
+// 			borderColor: '#6F7E8C'
+// 		}
+// 	}
+// });
+
 const getBoundRepository = async () => {
 	return await getFromLocalStorage('bound_repo');
+};
+
+const getGhUsername = async () => {
+	return await getFromLocalStorage('gh_username');
 };
 
 const onBindRepo = async (
@@ -40,6 +72,8 @@ const onRemoveRepo = async (setRepo: React.Dispatch<React.SetStateAction<string>
 
 export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 	const [repo, setRepo] = useState<string>('');
+	const [ghUsername, setGhUsername] = useState<string>('');
+	const [lcProfile, setLcProfile] = useState<LC.Profile>();
 	const bindRepoInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -50,29 +84,56 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 				}
 			})
 			.catch(console.error);
+		getGhUsername()
+			.then((username: string | null) => {
+				if (username) {
+					setGhUsername(username);
+				}
+			})
+			.catch(console.error);
+
+		const getLcProfile = async (): Promise<LC.Profile> => {
+			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+			const lcProfile: LC.Profile = JSON.parse(
+				(await getFromPageLocalStorage('GLOBAL_DATA:value', tab.id!))!
+			);
+			return lcProfile;
+		};
+
+		getLcProfile()
+			.then((profile) => {
+				setLcProfile(profile);
+			})
+			.catch(console.error);
 	}, []);
 
 	return (
 		<>
-			<div>Welcome</div>
+			<Typography variant="h5">Welcome!</Typography>
 			{repo != '' && (
 				<>
-					<p>Currently bound repo: {repo}</p>
+					<Typography variant="subtitle1">
+						Currently bound repo: {ghUsername == '' ? repo : `${ghUsername}/${repo}`}
+					</Typography>
 					<Button variant="outlined" color="error" onClick={() => onRemoveRepo(setRepo)}>
-						Remove it
+						Re-bind repo
 					</Button>
 				</>
 			)}
 			{repo == '' && (
 				<>
-					<p>Name of the repo you want to bind to</p>
-					<TextField inputRef={bindRepoInputRef} label="Name" />
-					<button onClick={async () => await onBindRepo(bindRepoInputRef, ghUser, setRepo)}>
+					<Typography variant="subtitle2">Name of the repo you want to bind to</Typography>
+					<TextField size="small" inputRef={bindRepoInputRef} label="Name" />
+					<Button onClick={async () => await onBindRepo(bindRepoInputRef, ghUser, setRepo)}>
 						bind
-					</button>
+					</Button>
 				</>
 			)}
-			<button onClick={() => onLogOut()}>log out</button>
+			<Stats lcProfile={lcProfile} />
+			<hr style={{ marginTop: '20px' }} />
+			<Button color="error" onClick={() => onLogOut()}>
+				Log out
+			</Button>
 		</>
 	);
 };

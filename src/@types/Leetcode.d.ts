@@ -1,9 +1,22 @@
 export namespace LC {
-	interface Profile {
+	type Profile = {
 		userStatus: UserStatus;
-	}
-	interface UserStatus {
+	};
+	type UserStatus = {
 		username: string;
 		activeSessionId: number;
-	}
+	};
+	type UserStats = {
+		data: {
+			matchedUser: {
+				submitStats: {
+					acSubmissionNum: Array<{
+						difficulty: string;
+						count: number;
+						submissions: number;
+					}>;
+				};
+			};
+		};
+	};
 }

@@ -1,6 +1,6 @@
+import { Question } from './Question';
+import { SubmissionStats } from './SubmissionStats';
+
 export namespace MessagePayload {
-	interface UploadCode {
-		questionNum: number;
-		questionTitle: string;
-	}
+	type UploadCode = SubmissionStats & Question;
 }

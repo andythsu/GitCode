@@ -3,5 +3,11 @@
 	"FIND_ELEMENT_ALLOWED_RETRIES": 20,
 	"GithubAPI": {
 		"host": "https://api.github.com"
+	},
+	"LeetcodeAPI": {
+		"graphql": "https://leetcode.com/graphql",
+		"queries": {
+			"getUserInfo": "query getUserProfile($username: String!) { matchedUser(username: $username) { username submitStats: submitStatsGlobal { acSubmissionNum { difficulty count submissions } } } }"
+		}
 	}
 }

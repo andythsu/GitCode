@@ -1,5 +1,7 @@
 import { Github } from './@types/Github';
 import { StorageKey } from './@types/StorageKey';
+import config from '../config.json';
+import { MessagePayload } from './@types/Payload';
 
 export const saveToLocalStorage = (key: StorageKey, val: any): void => {
 	chrome.storage.local.set({ [key]: val }, () => {
@@ -22,10 +24,11 @@ export const removeFromLocalStorage = async (key: StorageKey): Promise<void> => 
 
 export const uploadToGithub = async (
 	code: string,
-	questionNum: number,
-	questionTitle: string,
-	lang: string
+	uploadCodePayload: MessagePayload.UploadCode
 ): Promise<Response> => {
+	const { questionNum, questionTitle, lang, runtime, runtimeFasterThan, memory, memoryLessThan } =
+		uploadCodePayload;
+
 	const accessToken: string | null = await getFromLocalStorage('access_token');
 	const ghUsername: string | null = await getFromLocalStorage('gh_username');
 	const boundRepo: string | null = await getFromLocalStorage('bound_repo');
@@ -38,7 +41,7 @@ export const uploadToGithub = async (
 
 	// check if file exists already. If we are updating the file, we need SHA of the file
 	const fileExistsRes = await fetch(
-		`https://api.github.com/repos/${ghUsername}/${boundRepo}/contents/${path}`,
+		`${config.GithubAPI.host}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
 		{
 			method: 'GET',
 			headers: {
@@ -49,7 +52,7 @@ export const uploadToGithub = async (
 	);
 
 	let data: { message: string; content: string; sha?: string } = {
-		message: 'commit',
+		message: `Runtime: ${runtime} (${runtimeFasterThan}), Memory: ${memory} (${memoryLessThan}) - Gitcode`,
 		content: `${Buffer.from(code, 'utf8').toString('base64')}`
 	};
 
@@ -62,7 +65,7 @@ export const uploadToGithub = async (
 	}
 
 	const res = await fetch(
-		`https://api.github.com/repos/${ghUsername}/${boundRepo}/contents/${path}`,
+		`${config.GithubAPI.host}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
 		{
 			method: 'PUT',
 			headers: {
@@ -72,6 +75,10 @@ export const uploadToGithub = async (
 			body: JSON.stringify(data)
 		}
 	);
+
+	console.log('code', code);
+	console.log('payload', uploadCodePayload);
+
 	return res;
 };
 

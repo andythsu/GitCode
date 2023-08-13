@@ -1,4 +1,4 @@
-export interface Message {
+export type Message = {
 	type: string;
 	payload: string;
-}
+};

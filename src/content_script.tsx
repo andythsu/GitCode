@@ -1,6 +1,7 @@
 import config from '../config.json';
 import { Message } from './@types/Message';
 import { MessagePayload } from './@types/Payload';
+import { SubmissionStats } from './@types/SubmissionStats';
 
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
 	return new Promise((resolve, reject) => {
@@ -74,16 +75,16 @@ const getQuestionData = async (): Promise<{
 	const innterText = questionTitleElem.innerText;
 	const questionNumStr = innterText.split('.')[0];
 	const questionTitle = innterText.split('.')[1];
-	// return parseInt(questionNumStr);
 	return {
 		questionNum: parseInt(questionNumStr),
 		questionTitle
 	};
 };
 
-const uploadCode = async (): Promise<void> => {
+const uploadCode = async (submissionStats: SubmissionStats): Promise<void> => {
 	const { questionNum, questionTitle } = await getQuestionData();
 	const payload: string = JSON.stringify({
+		...submissionStats,
 		questionNum,
 		questionTitle
 	} as MessagePayload.UploadCode);
@@ -102,7 +103,26 @@ const uploadCode = async (): Promise<void> => {
 				);
 				if (!successTag[0])
 					throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
-				await uploadCode();
+
+				const submissionResult: HTMLCollectionOf<Element> =
+					document.getElementsByClassName('info__2oQ9');
+
+				const runtimeElem: HTMLCollectionOf<Element> =
+					submissionResult[0].getElementsByClassName('data__HC-i');
+				const runtime = (runtimeElem[0] as HTMLSpanElement).innerText;
+				const runtimeFasterThan = (runtimeElem[1] as HTMLSpanElement).innerText;
+
+				const memoryElem: HTMLCollectionOf<Element> =
+					submissionResult[1].getElementsByClassName('data__HC-i');
+				const memory = (memoryElem[0] as HTMLSpanElement).innerText;
+				const memoryLessThan = (memoryElem[1] as HTMLSpanElement).innerText;
+
+				await uploadCode({
+					runtime,
+					runtimeFasterThan,
+					memory,
+					memoryLessThan
+				});
 			} catch (e) {
 				console.error(e);
 			}

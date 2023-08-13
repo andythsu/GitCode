@@ -6,17 +6,6 @@ class Auth {
 	private accessToken = '';
 	private scopes = ['repo'];
 
-	constructor() {
-		// init access token
-		getFromLocalStorage('access_token').then((data: string | null) => {
-			if (data) {
-				this.accessToken = data;
-			} else {
-				console.log('access_token not set in storage');
-			}
-		});
-	}
-
 	authWithGithub(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			chrome.identity.launchWebAuthFlow(
@@ -70,7 +59,15 @@ class Auth {
 		saveToLocalStorage('access_token', this.accessToken);
 	}
 
-	getAccessToken(): string {
+	async getAccessToken(): Promise<string> {
+		if (this.accessToken) return this.accessToken;
+		await getFromLocalStorage('access_token').then((data: string | null) => {
+			if (data) {
+				this.accessToken = data;
+			} else {
+				console.log('access_token not set in storage');
+			}
+		});
 		return this.accessToken;
 	}
 }

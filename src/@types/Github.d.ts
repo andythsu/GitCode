@@ -1,9 +1,9 @@
 export namespace Github {
-	interface User {
+	type User = {
 		login: string;
-	}
+	};
 
-	interface RepoContent {
+	type RepoContent = {
 		sha: string;
-	}
+	};
 }

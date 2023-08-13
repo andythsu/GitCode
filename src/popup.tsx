@@ -9,6 +9,7 @@ import '@fontsource/roboto/700.css';
 import './popup.css';
 import { GHUser } from './GHUser';
 import { Button } from '@mui/material';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import { removeFromLocalStorage } from './util';
 
 type PopupProps = {
@@ -33,19 +34,26 @@ const onLogOut = async (
 
 const Popup = ({ auth, ghUser }: PopupProps) => {
 	const [loggedIn, setLoggedIn] = useState(false);
+
 	useEffect(() => {
-		const accessToken = auth.getAccessToken();
-		ghUser.init(accessToken);
-		if (accessToken) {
-			setLoggedIn(true);
-		}
+		auth.getAccessToken().then((accessToken) => {
+			if (accessToken) {
+				setLoggedIn(true);
+				ghUser.init(accessToken);
+			}
+		});
 	}, []);
+
 	return (
 		<>
 			{loggedIn ? (
 				<Welcome ghUser={ghUser} onLogOut={async () => await onLogOut(setLoggedIn)}></Welcome>
 			) : (
-				<Button onClick={async () => await authWithGithub(auth, setLoggedIn)}>
+				<Button
+					variant="contained"
+					startIcon={<GitHubIcon />}
+					onClick={() => authWithGithub(auth, setLoggedIn)}
+				>
 					Authenticate with Github
 				</Button>
 			)}

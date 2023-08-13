@@ -21,6 +21,7 @@ export const Stats = ({ lcProfile }: StatsProps) => {
 	const [easy, setEasy] = useState(0);
 	const [medium, setMedium] = useState(0);
 	const [hard, setHard] = useState(0);
+	const [lcUsername, setLcUsername] = useState('');
 
 	useEffect(() => {
 		getFromLocalStorage('numOfEasyQuestions').then((data) => {
@@ -32,10 +33,14 @@ export const Stats = ({ lcProfile }: StatsProps) => {
 		getFromLocalStorage('numOfHardQuestions').then((data) => {
 			if (data) setHard(parseInt(data));
 		});
+		getFromLocalStorage('lc_username').then((data) => {
+			if (data) setLcUsername(data);
+		});
 	});
 
 	useEffect(() => {
 		if (!lcProfile) return;
+		saveToLocalStorage('lc_username', lcProfile.userStatus.username);
 		const query = {
 			operationName: 'getUserProfile',
 			query: config.LeetcodeAPI.queries.getUserInfo,
@@ -65,7 +70,8 @@ export const Stats = ({ lcProfile }: StatsProps) => {
 
 	return (
 		<>
-			<p style={{ fontSize: '16px' }}>On Leetcode, you have solved:</p>
+			<p style={{ fontSize: '16px' }}>Currently logged in as {lcUsername} on Leetcode.</p>
+			<p style={{ fontSize: '16px' }}>You have solved:</p>
 			<Grid container spacing={2}>
 				<Grid item xs={4}>
 					<Item>

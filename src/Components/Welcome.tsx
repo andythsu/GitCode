@@ -129,7 +129,7 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 					</Button>
 				</>
 			)}
-			<Stats lcProfile={lcProfile} />
+			{lcProfile && <Stats lcProfile={lcProfile} />}
 			<hr style={{ marginTop: '20px' }} />
 			<Button color="error" onClick={() => onLogOut()}>
 				Log out

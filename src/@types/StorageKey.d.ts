@@ -4,4 +4,5 @@ export type StorageKey =
 	| 'gh_username'
 	| 'numOfEasyQuestions'
 	| 'numOfMediumQuestions'
-	| 'numOfHardQuestions';
+	| 'numOfHardQuestions'
+	| 'lc_username';

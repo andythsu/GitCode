@@ -10,13 +10,13 @@ class Auth {
 	async authWithGithub(): Promise<void> {
 		const redirectUrl = config.Auth.redirectUrl;
 		const responseUrl = await chrome.identity.launchWebAuthFlow({
-			url: `https://github.com/login/oauth/authorize?redirect_uri=${redirectUrl}scope=${this.scopes.join(
+			url: `https://github.com/login/oauth/authorize?redirect_uri=${redirectUrl}/*&scope=${this.scopes.join(
 				'%20'
 			)}&client_id=${this.clientId}`,
 			interactive: true
 		});
 		if (responseUrl) {
-			this.setToken(responseUrl);
+			await this.setToken(responseUrl);
 		}
 	}
 

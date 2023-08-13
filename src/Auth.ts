@@ -1,4 +1,5 @@
 import axios from 'axios';
+import config from '../config.json';
 import { getFromLocalStorage, saveToLocalStorage } from './util';
 class Auth {
 	private clientId = 'f0931287bb5d9d34de53';
@@ -6,23 +7,17 @@ class Auth {
 	private accessToken = '';
 	private scopes = ['repo'];
 
-	authWithGithub(): Promise<void> {
-		return new Promise((resolve, reject) => {
-			chrome.identity.launchWebAuthFlow(
-				{
-					url: `https://github.com/login/oauth/authorize?scope=${this.scopes.join(
-						'%20'
-					)}&client_id=${this.clientId}`,
-					interactive: true
-				},
-				(responseUrl?: string) => {
-					if (responseUrl) {
-						this.setToken(responseUrl);
-						resolve();
-					}
-				}
-			);
+	async authWithGithub(): Promise<void> {
+		const redirectUrl = config.Auth.redirectUrl;
+		const responseUrl = await chrome.identity.launchWebAuthFlow({
+			url: `https://github.com/login/oauth/authorize?redirect_uri=${redirectUrl}scope=${this.scopes.join(
+				'%20'
+			)}&client_id=${this.clientId}`,
+			interactive: true
 		});
+		if (responseUrl) {
+			this.setToken(responseUrl);
+		}
 	}
 
 	async setToken(responseUrl: string): Promise<void> {

@@ -1,7 +1,7 @@
 import { Grid, Paper, styled } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import config from '../../config.json';
+// import config from '../../config/config.js';
 import { LC } from '../@types/Leetcode';
 import { getFromLocalStorage, saveToLocalStorage } from '../util';
 
@@ -40,17 +40,18 @@ export const Stats = ({ lcProfile }: StatsProps) => {
 
 	useEffect(() => {
 		if (!lcProfile) return;
+		console.log('lc', process.env.LC_QUERIES_GET_USER_INFO);
 		console.log(lcProfile);
 		saveToLocalStorage('lc_username', lcProfile.userStatus.username);
 		const query = {
 			operationName: 'getUserProfile',
-			query: config.LeetcodeAPI.queries.getUserInfo,
+			query: process.env.LC_QUERIES_GET_USER_INFO,
 			variables: {
 				username: lcProfile.userStatus.username
 			}
 		};
 		axios
-			.post(config.LeetcodeAPI.graphql, query, {
+			.post(process.env.LC_API_HOST, query, {
 				headers: {
 					'Content-Type': 'application/json'
 				}

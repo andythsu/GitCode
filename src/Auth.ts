@@ -1,5 +1,4 @@
 import axios from 'axios';
-import config from '../config.json';
 import { getFromLocalStorage, saveToLocalStorage } from './util';
 class Auth {
 	private clientId = 'f0931287bb5d9d34de53';
@@ -8,7 +7,7 @@ class Auth {
 	private scopes = ['repo'];
 
 	async authWithGithub(): Promise<void> {
-		const redirectUrl = config.Auth.redirectUrl;
+		const redirectUrl = process.env.GITHUB_AUTH_REDIRECT_URL;
 		const responseUrl = await chrome.identity.launchWebAuthFlow({
 			url: `https://github.com/login/oauth/authorize?redirect_uri=${redirectUrl}/*&scope=${this.scopes.join(
 				'%20'

@@ -1,5 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import config from '../config.json';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Github } from './@types/Github';
 import { saveToLocalStorage } from './util';
 
@@ -13,7 +12,7 @@ export class GHUser {
 				Authorization: `Bearer ${this.accessToken}`
 			}
 		};
-		axios.get(`${config.GithubAPI.host}/user`, reqConfig).then((response) => {
+		axios.get(`${process.env.GITHUB_API_HOST}/user`, reqConfig).then((response) => {
 			const data = response.data as Github.User;
 			this.username = data.login;
 			saveToLocalStorage('gh_username', this.username);

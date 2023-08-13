@@ -34,7 +34,6 @@ const onLogOut = async (
 
 const Popup = ({ auth, ghUser }: PopupProps) => {
 	const [loggedIn, setLoggedIn] = useState(false);
-
 	useEffect(() => {
 		auth.getAccessToken().then((accessToken) => {
 			if (accessToken) {

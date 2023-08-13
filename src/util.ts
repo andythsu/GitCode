@@ -1,6 +1,5 @@
 import { Github } from './@types/Github';
 import { StorageKey } from './@types/StorageKey';
-import config from '../config.json';
 import { MessagePayload } from './@types/Payload';
 
 export const saveToLocalStorage = (key: StorageKey, val: any): void => {
@@ -41,7 +40,7 @@ export const uploadToGithub = async (
 
 	// check if file exists already. If we are updating the file, we need SHA of the file
 	const fileExistsRes = await fetch(
-		`${config.GithubAPI.host}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
+		`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
 		{
 			method: 'GET',
 			headers: {
@@ -65,7 +64,7 @@ export const uploadToGithub = async (
 	}
 
 	const res = await fetch(
-		`${config.GithubAPI.host}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
+		`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
 		{
 			method: 'PUT',
 			headers: {

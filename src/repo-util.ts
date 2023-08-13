@@ -1,5 +1,4 @@
 import { GHUser } from './GHUser';
-import config from '../config.json';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 
 export const repoExists = async (repoName: string, ghUser: GHUser) => {
@@ -11,7 +10,7 @@ export const repoExists = async (repoName: string, ghUser: GHUser) => {
 	};
 	try {
 		const result = await axios.get(
-			`${config.GithubAPI.host}/repos/${ghUsername}/${repoName}`,
+			`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${repoName}`,
 			reqConfig
 		);
 		return result.status === 200;
@@ -35,5 +34,5 @@ export const createRepo = async (repoName: string, ghUser: GHUser): Promise<void
 	const reqData = {
 		name: repoName
 	};
-	await axios.post(`${config.GithubAPI.host}/user/repos`, reqData, reqConfig);
+	await axios.post(`${process.env.GITHUB_API_HOST}/user/repos`, reqData, reqConfig);
 };

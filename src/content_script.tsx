@@ -1,4 +1,3 @@
-import config from '../config.json';
 import { Message } from './@types/Message';
 import { MessagePayload } from './@types/Payload';
 import { SubmissionStats } from './@types/SubmissionStats';
@@ -6,8 +5,8 @@ import { SubmissionStats } from './@types/SubmissionStats';
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
 	return new Promise((resolve, reject) => {
 		let count = 0;
-		const EXPIRY_IN_MS = config.FIND_ELEMENT_EXPIRY_IN_MS;
-		const ALLOWED_RETRIES = config.FIND_ELEMENT_ALLOWED_RETRIES;
+		const EXPIRY_IN_MS = parseInt(process.env.FIND_ELEMENT_EXPIRY_IN_MS);
+		const ALLOWED_RETRIES = parseInt(process.env.FIND_ELEMENT_ALLOWED_RETRIES);
 		const timer = setInterval(() => {
 			const elem = document.querySelectorAll(query);
 			if (elem.length > 0) {
@@ -29,8 +28,8 @@ const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf
 const getElementByClassNameWithTimeout = (query: string): Promise<HTMLCollectionOf<Element>> => {
 	return new Promise((resolve, reject) => {
 		let count = 0;
-		const EXPIRY_IN_MS = config.FIND_ELEMENT_EXPIRY_IN_MS;
-		const ALLOWED_RETRIES = config.FIND_ELEMENT_ALLOWED_RETRIES;
+		const EXPIRY_IN_MS = parseInt(process.env.FIND_ELEMENT_EXPIRY_IN_MS);
+		const ALLOWED_RETRIES = parseInt(process.env.FIND_ELEMENT_ALLOWED_RETRIES);
 		const timer = setInterval(() => {
 			const elem = document.getElementsByClassName(query);
 			if (elem.length > 0) {

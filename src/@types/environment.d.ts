@@ -9,6 +9,7 @@ declare global {
 			GITHUB_AUTH_CLIENT_SECRET: string;
 			LC_API_HOST: string;
 			LC_QUERIES_GET_USER_INFO: string;
+			LC_QUERIES_GET_QUESTION_OF_DAY: string;
 		}
 	}
 }

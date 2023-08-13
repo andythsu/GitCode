@@ -9,34 +9,15 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { GHUser } from '../GHUser';
 import { createRepo, repoExists } from '../repo-util';
-import { Typography, styled } from '@mui/material';
+import { Typography } from '@mui/material';
 import { Stats } from './Stats';
 import { LC } from '../@types/Leetcode';
+import axios from 'axios';
 
 type WelcomeProps = {
 	ghUser: GHUser;
 	onLogOut: () => void;
 };
-
-// const CssTextField = styled(TextField)({
-// 	'& label.Mui-focused': {
-// 		color: '#A0AAB4'
-// 	},
-// 	'& .MuiInput-underline:after': {
-// 		borderBottomColor: '#B2BAC2'
-// 	},
-// 	'& .MuiOutlinedInput-root': {
-// 		'& fieldset': {
-// 			borderColor: '#E0E3E7'
-// 		},
-// 		'&:hover fieldset': {
-// 			borderColor: '#B2BAC2'
-// 		},
-// 		'&.Mui-focused fieldset': {
-// 			borderColor: '#6F7E8C'
-// 		}
-// 	}
-// });
 
 const getBoundRepository = async () => {
 	return await getFromLocalStorage('bound_repo');
@@ -74,6 +55,7 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 	const [repo, setRepo] = useState<string>('');
 	const [ghUsername, setGhUsername] = useState<string>('');
 	const [lcProfile, setLcProfile] = useState<LC.Profile>();
+	const [questionOfDay, setQuestionOfDay] = useState<LC.QuestionOfDay>();
 	const bindRepoInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -117,6 +99,26 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 				}
 			})
 			.catch(console.error);
+
+		const questionOfDayQuery = {
+			operationName: 'questionOfToday',
+			query: process.env.LC_QUERIES_GET_QUESTION_OF_DAY,
+			variables: {}
+		};
+
+		axios
+			.post(process.env.LC_API_HOST, questionOfDayQuery, {
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((res) => {
+				const data = res.data as LC.QuestionOfDay;
+				if (data) {
+					setQuestionOfDay(data);
+				}
+			})
+			.catch(console.error);
 	}, []);
 
 	return (
@@ -141,6 +143,16 @@ export const Welcome = ({ ghUser, onLogOut }: WelcomeProps) => {
 				</>
 			)}
 			{lcProfile && <Stats lcProfile={lcProfile} />}
+			<br />
+			<Typography variant="subtitle1">
+				Question of today:{' '}
+				<a
+					href={`https://leetcode.com${questionOfDay?.data.activeDailyCodingChallengeQuestion.link}`}
+					target="_blank"
+				>
+					{questionOfDay?.data.activeDailyCodingChallengeQuestion.question.titleSlug}
+				</a>
+			</Typography>
 			<hr style={{ marginTop: '20px' }} />
 			<Button color="error" onClick={() => onLogOut()}>
 				Log out

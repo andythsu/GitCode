@@ -40,8 +40,6 @@ export const Stats = ({ lcProfile }: StatsProps) => {
 
 	useEffect(() => {
 		if (!lcProfile) return;
-		console.log('lc', process.env.LC_QUERIES_GET_USER_INFO);
-		console.log(lcProfile);
 		saveToLocalStorage('lc_username', lcProfile.userStatus.username);
 		const query = {
 			operationName: 'getUserProfile',

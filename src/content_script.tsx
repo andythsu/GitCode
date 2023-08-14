@@ -80,10 +80,12 @@ const uploadCode = async (submissionDetails: LC.SubmissionDetails): Promise<void
 };
 
 (async () => {
+	let submitBtn: Element | null = null;
 	try {
-		const submitBtn = (
-			await getElementByQuerySelectorWithTimeout(`[data-cy="submit-code-btn"]`)
-		)[0];
+		submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-cy="submit-code-btn"]`))[0];
+	} catch (e) {}
+	if (!submitBtn) return;
+	try {
 		submitBtn.addEventListener('click', async () => {
 			try {
 				const successTag: HTMLCollectionOf<Element> = await getElementByClassNameWithTimeout(

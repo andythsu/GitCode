@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Message } from './@types/Message';
 import { MessagePayload } from './@types/Payload';
 import { LC } from './@types/Leetcode';
+import { fetchLC } from './fetch-util';
 
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
 	return new Promise((resolve, reject) => {
@@ -107,16 +108,7 @@ const uploadCode = async (submissionDetails: LC.SubmissionDetails): Promise<void
 					operationName: 'submissionDetails'
 				};
 
-				const res = await fetch(process.env.LC_API_HOST, {
-					method: 'POST',
-					body: JSON.stringify(submissionDetailsQuery),
-					headers: {
-						cookie: document.cookie,
-						'content-type': 'application/json'
-					}
-				});
-
-				const submissionDetails: LC.SubmissionDetails = await res.json();
+				const submissionDetails: LC.SubmissionDetails = await fetchLC(submissionDetailsQuery);
 
 				await uploadCode(submissionDetails);
 			} catch (e) {

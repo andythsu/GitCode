@@ -1,7 +1,8 @@
 import { Message } from './@types/Message';
 import { MessagePayload } from './@types/Payload';
 import { LCProfile } from './LCProfile';
-import { getFromPageLocalStorage, uploadToGithub } from './util';
+import { uploadToGithub } from './repo-util';
+import { getFromPageLocalStorage } from './util';
 
 let lcProfile: LCProfile;
 

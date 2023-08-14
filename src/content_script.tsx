@@ -60,14 +60,20 @@ const uploadCode = async (submissionDetails: LC.SubmissionDetails): Promise<void
 		code
 	} = submissionDetails.data.submissionDetails;
 	const payload: string = JSON.stringify({
-		questionNum: parseInt(question.questionId),
-		questionTitle: question.title,
-		lang: lang.name,
-		runtime: runtimeDisplay,
-		runtimeFasterThan: runtimePercentile.toFixed(2),
-		memory: memoryDisplay,
-		memoryLessThan: memoryPercentile.toFixed(2),
-		code
+		submission: {
+			runtime: runtimeDisplay,
+			runtimeFasterThan: runtimePercentile.toFixed(2),
+			memory: memoryDisplay,
+			memoryLessThan: memoryPercentile.toFixed(2),
+			code
+		},
+		question: {
+			questionNum: parseInt(question.questionId),
+			questionTitle: question.title,
+			lang: lang.name,
+			content: question.content,
+			titleSlug: question.titleSlug
+		}
 	} as MessagePayload.UploadCode);
 	await chrome.runtime.sendMessage<Message, any>({ type: 'uploadCode', payload });
 };

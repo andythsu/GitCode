@@ -23,17 +23,9 @@ export const removeFromLocalStorage = async (key: StorageKey): Promise<void> => 
 
 export const uploadToGithub = async (
 	uploadCodePayload: MessagePayload.UploadCode
-): Promise<Response> => {
-	const {
-		questionNum,
-		questionTitle,
-		lang,
-		runtime,
-		runtimeFasterThan,
-		memory,
-		memoryLessThan,
-		code
-	} = uploadCodePayload;
+): Promise<void> => {
+	const { questionNum, questionTitle, lang, content, titleSlug } = uploadCodePayload.question;
+	const { runtime, runtimeFasterThan, memory, memoryLessThan, code } = uploadCodePayload.submission;
 
 	const accessToken: string | null = await getFromLocalStorage('access_token');
 	const ghUsername: string | null = await getFromLocalStorage('gh_username');
@@ -43,49 +35,31 @@ export const uploadToGithub = async (
 	if (!ghUsername) throw new Error(`Github username not found`);
 	if (!boundRepo) throw new Error(`Bound repo not found`);
 
-	const path = `${questionNum}. ${questionTitle}.${lang}`;
+	const folder = `${questionNum}-${titleSlug}`;
+	const file = `${questionNum}. ${questionTitle}.${lang}`;
+	const readme = `README.md`;
 
-	// check if file exists already. If we are updating the file, we need SHA of the file
-	const fileExistsRes = await fetch(
-		`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
-		{
-			method: 'GET',
-			headers: {
-				Accept: 'application/vnd.github+json',
-				Authorization: `Bearer ${accessToken}`
-			}
-		}
-	);
+	try {
+		const upsertSolution = await upsert(
+			`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${folder}/${file}`,
+			`Runtime: ${runtime} (${runtimeFasterThan}%), Memory: ${memory} (${memoryLessThan}%) - Gitcode`,
+			Buffer.from(code, 'utf8').toString('base64'),
+			accessToken
+		);
 
-	let data: { message: string; content: string; sha?: string } = {
-		message: `Runtime: ${runtime} (${runtimeFasterThan}%), Memory: ${memory} (${memoryLessThan}%) - Gitcode`,
-		content: `${Buffer.from(code, 'utf8').toString('base64')}`
-	};
+		console.log('upsert solution', upsertSolution);
 
-	if (fileExistsRes.status === 200) {
-		const content: Github.RepoContent = await fileExistsRes.json();
-		data = {
-			...data,
-			sha: content.sha
-		};
+		const upsertReadMe = await upsert(
+			`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${folder}/${readme}`,
+			'Readme',
+			Buffer.from(content, 'utf8').toString('base64'),
+			accessToken
+		);
+
+		console.log('upsert readme', upsertReadMe);
+	} catch (e) {
+		console.error(e);
 	}
-
-	const res = await fetch(
-		`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${path}`,
-		{
-			method: 'PUT',
-			headers: {
-				Accept: 'application/vnd.github+json',
-				Authorization: `Bearer ${accessToken}`
-			},
-			body: JSON.stringify(data)
-		}
-	);
-
-	console.log('code', code);
-	console.log('payload', uploadCodePayload);
-
-	return res;
 };
 
 export const getFromPageLocalStorage = async (
@@ -103,4 +77,39 @@ export const getFromPageLocalStorage = async (
 		args: [key]
 	});
 	return res[0].result;
+};
+
+const upsert = async (url: string, message: string, content: string, accessToken: string) => {
+	const fileExistsRes = await fetch(url, {
+		method: 'GET',
+		headers: {
+			Accept: 'application/vnd.github+json',
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	let data: { message: string; content: string; sha?: string } = {
+		message: message,
+		content: content
+	};
+
+	// we need to append file sha if we are updating an existing file in GH
+	if (fileExistsRes.status === 200) {
+		const repoContent: Github.RepoContent = await fileExistsRes.json();
+		data = {
+			...data,
+			sha: repoContent.sha
+		};
+	}
+
+	const res = await fetch(url, {
+		method: 'PUT',
+		headers: {
+			Accept: 'application/vnd.github+json',
+			Authorization: `Bearer ${accessToken}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	return res;
 };

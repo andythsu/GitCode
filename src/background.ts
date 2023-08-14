@@ -30,8 +30,7 @@ const checkLCProfile = async (
 
 const uploadCode = async (payload: string): Promise<void> => {
 	const uploadCodePayload = JSON.parse(payload) as MessagePayload.UploadCode;
-	const res = await uploadToGithub(uploadCodePayload);
-	console.log('upload to github result', res);
+	await uploadToGithub(uploadCodePayload);
 };
 
 const messageHandlers = new Map<string, (payload: string) => Promise<void>>();

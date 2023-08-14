@@ -1,9 +1,9 @@
 import { Question } from './Question';
-import { SubmissionStats } from './SubmissionStats';
+import { Submission } from './Submission';
 
 export namespace MessagePayload {
-	type UploadCode = SubmissionStats &
-		Question & {
-			code: string;
-		};
+	type UploadCode = {
+		submission: Submission;
+		question: Question;
+	};
 }

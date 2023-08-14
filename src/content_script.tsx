@@ -1,6 +1,7 @@
+import axios from 'axios';
 import { Message } from './@types/Message';
 import { MessagePayload } from './@types/Payload';
-import { SubmissionStats } from './@types/SubmissionStats';
+import { LC } from './@types/Leetcode';
 
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
 	return new Promise((resolve, reject) => {
@@ -48,44 +49,25 @@ const getElementByClassNameWithTimeout = (query: string): Promise<HTMLCollection
 	});
 };
 
-/**
- * gets the code from UI.
- * @deprecated Marking this deprecated since we can get the code from localStroage
- * @returns Promise<string>
- */
-const getCodeFromUI = (): Promise<string> => {
-	const codeEditor: Element = document.getElementsByClassName('CodeMirror-code')[0];
-	const codeLines: HTMLCollectionOf<HTMLPreElement> = codeEditor.getElementsByTagName('pre');
-	let code: string = '';
-	for (let i = 0; i < codeLines.length; i++) {
-		code += codeLines[i].innerText;
-		code += '\n';
-	}
-	return Promise.resolve(code);
-};
-
-const getQuestionData = async (): Promise<{
-	questionNum: number;
-	questionTitle: string;
-}> => {
-	const questionTitleElem = (
-		await getElementByQuerySelectorWithTimeout(`[data-cy="question-title"]`)
-	)[0] as HTMLDivElement;
-	const innterText = questionTitleElem.innerText;
-	const questionNumStr = innterText.split('.')[0];
-	const questionTitle = innterText.split('.')[1];
-	return {
-		questionNum: parseInt(questionNumStr),
-		questionTitle
-	};
-};
-
-const uploadCode = async (submissionStats: SubmissionStats): Promise<void> => {
-	const { questionNum, questionTitle } = await getQuestionData();
+const uploadCode = async (submissionDetails: LC.SubmissionDetails): Promise<void> => {
+	const {
+		lang,
+		question,
+		memoryDisplay,
+		memoryPercentile,
+		runtimeDisplay,
+		runtimePercentile,
+		code
+	} = submissionDetails.data.submissionDetails;
 	const payload: string = JSON.stringify({
-		...submissionStats,
-		questionNum,
-		questionTitle
+		questionNum: parseInt(question.questionId),
+		questionTitle: question.title,
+		lang: lang.name,
+		runtime: runtimeDisplay,
+		runtimeFasterThan: runtimePercentile.toFixed(2),
+		memory: memoryDisplay,
+		memoryLessThan: memoryPercentile.toFixed(2),
+		code
 	} as MessagePayload.UploadCode);
 	await chrome.runtime.sendMessage<Message, any>({ type: 'uploadCode', payload });
 };
@@ -103,25 +85,34 @@ const uploadCode = async (submissionStats: SubmissionStats): Promise<void> => {
 				if (!successTag[0])
 					throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
 
-				const submissionResult: HTMLCollectionOf<Element> =
-					document.getElementsByClassName('info__2oQ9');
+				const detailsElem = successTag[0].parentElement?.getElementsByTagName('a')[0];
+				if (!detailsElem) return;
+				const submissionLink = detailsElem.href;
+				const slashIndexes = [...submissionLink.matchAll(/\//g)];
+				const submissionId = detailsElem.href.substring(
+					slashIndexes[slashIndexes.length - 2].index! + 1,
+					slashIndexes[slashIndexes.length - 1].index!
+				);
+				const submissionDetailsQuery = {
+					query: process.env.LC_QUERIES_GET_SUBMISSION_DETAILS,
+					variables: {
+						submissionId
+					},
+					operationName: 'submissionDetails'
+				};
 
-				const runtimeElem: HTMLCollectionOf<Element> =
-					submissionResult[0].getElementsByClassName('data__HC-i');
-				const runtime = (runtimeElem[0] as HTMLSpanElement).innerText;
-				const runtimeFasterThan = (runtimeElem[1] as HTMLSpanElement).innerText;
-
-				const memoryElem: HTMLCollectionOf<Element> =
-					submissionResult[1].getElementsByClassName('data__HC-i');
-				const memory = (memoryElem[0] as HTMLSpanElement).innerText;
-				const memoryLessThan = (memoryElem[1] as HTMLSpanElement).innerText;
-
-				await uploadCode({
-					runtime,
-					runtimeFasterThan,
-					memory,
-					memoryLessThan
+				const res = await fetch(process.env.LC_API_HOST, {
+					method: 'POST',
+					body: JSON.stringify(submissionDetailsQuery),
+					headers: {
+						cookie: document.cookie,
+						'content-type': 'application/json'
+					}
 				});
+
+				const submissionDetails: LC.SubmissionDetails = await res.json();
+
+				await uploadCode(submissionDetails);
 			} catch (e) {
 				console.error(e);
 			}

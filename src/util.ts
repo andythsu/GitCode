@@ -22,11 +22,18 @@ export const removeFromLocalStorage = async (key: StorageKey): Promise<void> => 
 };
 
 export const uploadToGithub = async (
-	code: string,
 	uploadCodePayload: MessagePayload.UploadCode
 ): Promise<Response> => {
-	const { questionNum, questionTitle, lang, runtime, runtimeFasterThan, memory, memoryLessThan } =
-		uploadCodePayload;
+	const {
+		questionNum,
+		questionTitle,
+		lang,
+		runtime,
+		runtimeFasterThan,
+		memory,
+		memoryLessThan,
+		code
+	} = uploadCodePayload;
 
 	const accessToken: string | null = await getFromLocalStorage('access_token');
 	const ghUsername: string | null = await getFromLocalStorage('gh_username');
@@ -36,7 +43,7 @@ export const uploadToGithub = async (
 	if (!ghUsername) throw new Error(`Github username not found`);
 	if (!boundRepo) throw new Error(`Bound repo not found`);
 
-	const path = `${questionNum}.${questionTitle}.${lang}`;
+	const path = `${questionNum}. ${questionTitle}.${lang}`;
 
 	// check if file exists already. If we are updating the file, we need SHA of the file
 	const fileExistsRes = await fetch(
@@ -51,7 +58,7 @@ export const uploadToGithub = async (
 	);
 
 	let data: { message: string; content: string; sha?: string } = {
-		message: `Runtime: ${runtime} (${runtimeFasterThan}), Memory: ${memory} (${memoryLessThan}) - Gitcode`,
+		message: `Runtime: ${runtime} (${runtimeFasterThan}%), Memory: ${memory} (${memoryLessThan}%) - Gitcode`,
 		content: `${Buffer.from(code, 'utf8').toString('base64')}`
 	};
 

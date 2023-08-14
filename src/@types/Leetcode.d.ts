@@ -44,4 +44,35 @@ export namespace LC {
 			};
 		};
 	};
+	type SubmissionDetails = {
+		data: {
+			submissionDetails: {
+				runtime: number;
+				runtimeDisplay: string;
+				runtimePercentile: number;
+				runtimeDistribution: string;
+				memory: number;
+				memoryDisplay: string;
+				memoryDistribution: string;
+				memoryPercentile: number;
+				code: string;
+				timestamp: number;
+				statusCode: number;
+				lang: {
+					name: string;
+					verboseName: string;
+				};
+				question: {
+					questionId: string;
+					title: string;
+					titleSlug: string;
+					content: string;
+					difficulty: string;
+				};
+				notes: string;
+				// topicTags: any[]; // not sure how to type this yet
+				runtimeError: null;
+			};
+		};
+	};
 }

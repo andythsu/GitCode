@@ -28,24 +28,9 @@ const checkLCProfile = async (
 	await next(payload);
 };
 
-const getRawCodeFromLocalStroage = async (questionNum: number): Promise<string> => {
-	const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-	const globalLang = JSON.parse((await getFromPageLocalStorage('global_lang', tab.id!))!);
-	const sessionId = lcProfile.getUserStatus().activeSessionId;
-	return (await getFromPageLocalStorage(`${questionNum}_${sessionId}_${globalLang}`, tab.id!))!;
-};
-
 const uploadCode = async (payload: string): Promise<void> => {
-	let uploadCodePayload = JSON.parse(payload) as MessagePayload.UploadCode;
-	const { questionNum } = uploadCodePayload;
-	const rawCode = await getRawCodeFromLocalStroage(questionNum);
-	const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-	const globalLang = JSON.parse((await getFromPageLocalStorage('global_lang', tab.id!))!);
-	uploadCodePayload = {
-		...uploadCodePayload,
-		lang: globalLang
-	};
-	const res = await uploadToGithub(JSON.parse(rawCode), uploadCodePayload);
+	const uploadCodePayload = JSON.parse(payload) as MessagePayload.UploadCode;
+	const res = await uploadToGithub(uploadCodePayload);
 	console.log('upload to github result', res);
 };
 

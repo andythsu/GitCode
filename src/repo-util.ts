@@ -78,7 +78,7 @@ export const uploadToGithub = async (
 
 		console.log('upsert readme', upsertReadMe);
 	} catch (e) {
-		console.error(e);
+		throw e;
 	}
 };
 

@@ -12,7 +12,14 @@
 		{
 			"matches": ["https://leetcode.com/*"],
 			"js": ["js/vendor.js", "js/content_script.js"],
+			"css": ["css/cute_alert.css"],
 			"run_at": "document_end"
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["cute_alert/success.svg"],
+			"matches": ["https://leetcode.com/*"]
 		}
 	],
 	"background": {

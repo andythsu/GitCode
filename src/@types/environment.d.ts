@@ -11,6 +11,7 @@ declare global {
 			LC_QUERIES_GET_USER_INFO: string;
 			LC_QUERIES_GET_QUESTION_OF_DAY: string;
 			LC_QUERIES_GET_SUBMISSION_DETAILS: string;
+			CUTE_TOAST_TIMER: string;
 		}
 	}
 }

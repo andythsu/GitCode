@@ -3,6 +3,7 @@ import { Message } from './@types/Message';
 import { MessagePayload } from './@types/Payload';
 import { LC } from './@types/Leetcode';
 import { fetchLC } from './fetch-util';
+import { cuteToast } from './CuteAlert';
 
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
 	return new Promise((resolve, reject) => {
@@ -76,8 +77,39 @@ const uploadCode = async (submissionDetails: LC.SubmissionDetails): Promise<void
 			titleSlug: question.titleSlug
 		}
 	} as MessagePayload.UploadCode);
-	await chrome.runtime.sendMessage<Message, any>({ type: 'uploadCode', payload });
+	const result: string = await chrome.runtime.sendMessage<Message, any>({
+		type: 'uploadCode',
+		payload
+	});
+	console.log(result);
+	const { type, message } = JSON.parse(result) as UploadCodeResult;
+	cuteToast({
+		type,
+		message
+	});
 };
+
+type UploadCodeResult = {
+	type: string;
+	message: string;
+};
+
+chrome.runtime.onMessage.addListener(
+	async (
+		message: Message,
+		sender: chrome.runtime.MessageSender,
+		sendResponse: (response?: any) => void
+	): Promise<void> => {
+		const { type, payload } = message;
+		if (type === 'uploadCodeResult') {
+			const { type, message } = JSON.parse(payload) as UploadCodeResult;
+			cuteToast({
+				type,
+				message
+			});
+		}
+	}
+);
 
 (async () => {
 	let submitBtn: Element | null = null;

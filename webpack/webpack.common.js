@@ -47,6 +47,9 @@ module.exports = {
 		new CopyPlugin({
 			patterns: [{ from: '.', to: '../', context: 'public' }],
 			options: {}
+		}),
+		new CopyPlugin({
+			patterns: [{ from: './css/*.css', to: '../', context: 'src' }]
 		})
 	]
 };

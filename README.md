@@ -17,7 +17,15 @@ I was one of the contributors to the opensource project [Leethub](https://github
 2. There's no easy way of accessing your leetcode problems in one place!
    Moreover, pushing code manually to GitHub from Leetcode is very time consuming. So, why not just automate it entirely without spending a SINGLE additional second on it?
 
-## Set up for local development
+### Roadmap
+
+The objective of GitCode not only pushes Leetcode solutions to Github, but also pushes solutions from other platforms to Github. Ultimately, Github should be our only source of portfolio, allowing us to conveniently access ALL of our solutions in one place.
+
+## Discord
+
+Join our [Discord channel](https://discord.gg/AEdWgPfQ) for discussions and opportunities to contribute.
+
+## Local development
 
 ### Prerequisites
 

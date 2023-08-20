@@ -114,7 +114,10 @@ chrome.runtime.onMessage.addListener(
 (async () => {
 	let submitBtn: Element | null = null;
 	try {
-		submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-cy="submit-code-btn"]`))[0];
+		submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-e2e-locator="console-submit-button"]`))[0];
+		if (!submitBtn) {
+			submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-cy="submit-code-btn"]`))[0];
+		}
 	} catch (e) {}
 	if (!submitBtn) return;
 	try {

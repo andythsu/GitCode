@@ -37,3 +37,13 @@ export const getFromPageLocalStorage = async (
 	});
 	return res[0].result;
 };
+
+export const isNewVersion = (): boolean => {
+	const scripts = document.scripts;
+	for (const script of scripts) {
+		if (script.id === 'chakra-script') {
+			return true;
+		}
+	}
+	return false;
+};

@@ -4,6 +4,7 @@ import { MessagePayload } from './@types/Payload';
 import { LC } from './@types/Leetcode';
 import { fetchLC } from './fetch-util';
 import { cuteToast } from './CuteAlert';
+import { isNewVersion } from './util';
 
 const getElementByQuerySelectorWithTimeout = (query: string): Promise<NodeListOf<Element>> => {
 	return new Promise((resolve, reject) => {
@@ -113,30 +114,56 @@ chrome.runtime.onMessage.addListener(
 
 (async () => {
 	let submitBtn: Element | null = null;
+	const isNewLc = isNewVersion();
 	try {
-		submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-e2e-locator="console-submit-button"]`))[0];
-		if (!submitBtn) {
+		if (isNewLc) {
+			submitBtn = (
+				await getElementByQuerySelectorWithTimeout(`[data-e2e-locator="console-submit-button"]`)
+			)[0];
+		} else {
 			submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-cy="submit-code-btn"]`))[0];
 		}
 	} catch (e) {}
+
 	if (!submitBtn) return;
+
 	try {
 		submitBtn.addEventListener('click', async () => {
 			try {
-				const successTag: HTMLCollectionOf<Element> = await getElementByClassNameWithTimeout(
-					'marked_as_success'
-				);
+				let successTag: HTMLCollectionOf<Element> | NodeListOf<Element>;
+				if (isNewLc) {
+					successTag = await getElementByQuerySelectorWithTimeout(
+						`[data-e2e-locator="submission-result"]`
+					);
+				} else {
+					successTag = await getElementByClassNameWithTimeout('marked_as_success');
+				}
+
 				if (!successTag[0])
 					throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
 
-				const detailsElem = successTag[0].parentElement?.getElementsByTagName('a')[0];
-				if (!detailsElem) return;
-				const submissionLink = detailsElem.href;
-				const slashIndexes = [...submissionLink.matchAll(/\//g)];
-				const submissionId = detailsElem.href.substring(
-					slashIndexes[slashIndexes.length - 2].index! + 1,
-					slashIndexes[slashIndexes.length - 1].index!
-				);
+				let submissionId: string;
+
+				if (isNewLc) {
+					const postSolutionButton =
+						successTag[0].parentElement?.parentElement?.getElementsByTagName('a')[1];
+					if (!postSolutionButton) return;
+					const link = postSolutionButton.href;
+					const searchParams = new URL(link).searchParams;
+					submissionId = searchParams.get('submissionId')!;
+				} else {
+					const detailsElem = successTag[0].parentElement?.getElementsByTagName('a')[0];
+					if (!detailsElem) return;
+					const submissionLink = detailsElem.href;
+					const slashIndexes = [...submissionLink.matchAll(/\//g)];
+					submissionId = detailsElem.href.substring(
+						slashIndexes[slashIndexes.length - 2].index! + 1,
+						slashIndexes[slashIndexes.length - 1].index!
+					);
+				}
+
+				console.log('submissionId', submissionId);
+
 				const submissionDetailsQuery = {
 					query: process.env.LC_QUERIES_GET_SUBMISSION_DETAILS,
 					variables: {

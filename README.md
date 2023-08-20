@@ -23,7 +23,7 @@ The objective of GitCode not only pushes Leetcode solutions to Github, but also 
 
 ## Discord
 
-Join our [Discord channel](https://discord.gg/AEdWgPfQ) for discussions and opportunities to contribute.
+Join our [Discord channel](https://discord.gg/QrujRsZdcB) for discussions and opportunities to contribute.
 
 ## Local development
 

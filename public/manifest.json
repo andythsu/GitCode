@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
-	"name": "Chrome Extension TypeScript Starter",
-	"description": "Chrome Extension, TypeScript, Visual Studio Code",
+	"name": "GitCode",
+	"description": "GitCode",
 	"version": "1.0",
 	"key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm1EAuVVG3EUnIujuTfPal6NDgOBQOW255XP/kFpA7xatfMi+4JojkAzKm+MeROKC18OtuLfGaQHSCXQKSoDisu45SLdDYO/yBTVT3rDqpUAJcbi20rAxaa4wKQAij0p0IXIivZfIs1RUgkWktZa6C0iG4DbtWeHWmQvDH3RmY8Jwub8BNBBKj/iSlt6sLL47SB5osx2ik6mxOHE7qtA1/QdHFR/ZFl4BumvlVEbeGajWH8mQUgli7Rb1n33B8XPUJkhfwAyIBvJnpgC5gktL2JmitH+Bl6Didxo/fureUuphOlUtDcTloeTI/+GXmK3pwDagUGMQD1RBCOdPW+0VLQIDAQAB",
 	"action": {

@@ -10,7 +10,7 @@
 		"test": "npx jest",
 		"style": "prettier --write \"src/**/*.{ts,tsx}\""
 	},
-	"author": "",
+	"author": "Andy Su",
 	"license": "MIT",
 	"repository": {
 		"type": "git",

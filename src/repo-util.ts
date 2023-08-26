@@ -41,6 +41,11 @@ export const createRepo = async (repoName: string, ghUser: GHUser): Promise<void
 	await axios.post(`${process.env.GITHUB_API_HOST}/user/repos`, reqData, reqConfig);
 };
 
+const langToExtMap: Record<string, string> = {
+	python3: 'py',
+	java: 'java'
+};
+
 export const uploadToGithub = async (
 	uploadCodePayload: MessagePayload.UploadCode
 ): Promise<void> => {
@@ -56,7 +61,7 @@ export const uploadToGithub = async (
 	if (!boundRepo) throw new Error(`Bound repo not found`);
 
 	const folder = `${questionNum}-${titleSlug}`;
-	const file = `${questionNum}. ${questionTitle}.${lang}`;
+	const file = `${questionNum}. ${questionTitle}.${langToExtMap[lang] || lang}`;
 	const readme = `README.md`;
 
 	try {

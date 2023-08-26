@@ -60,15 +60,6 @@ export const uploadToGithub = async (
 	const readme = `README.md`;
 
 	try {
-		const upsertSolution = await upsert(
-			`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${folder}/${file}`,
-			`Runtime: ${runtime} (${runtimeFasterThan}%), Memory: ${memory} (${memoryLessThan}%) - Gitcode`,
-			Buffer.from(code, 'utf8').toString('base64'),
-			accessToken
-		);
-
-		console.log('upsert solution', upsertSolution);
-
 		const upsertReadMe = await upsert(
 			`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${folder}/${readme}`,
 			'Readme',
@@ -77,6 +68,15 @@ export const uploadToGithub = async (
 		);
 
 		console.log('upsert readme', upsertReadMe);
+
+		const upsertSolution = await upsert(
+			`${process.env.GITHUB_API_HOST}/repos/${ghUsername}/${boundRepo}/contents/${folder}/${file}`,
+			`Runtime: ${runtime} (${runtimeFasterThan}%), Memory: ${memory} (${memoryLessThan}%) - Gitcode`,
+			Buffer.from(code, 'utf8').toString('base64'),
+			accessToken
+		);
+
+		console.log('upsert solution', upsertSolution);
 	} catch (e) {
 		throw e;
 	}

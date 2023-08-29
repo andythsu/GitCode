@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Message } from './@types/Message';
 import { MessagePayload } from './@types/Payload';
 import { LC } from './@types/Leetcode';
@@ -112,73 +111,64 @@ chrome.runtime.onMessage.addListener(
 	}
 );
 
+const pullSuccessTag = (
+	isNewLc: boolean
+): Promise<HTMLCollectionOf<Element> | NodeListOf<Element>> => {
+	return new Promise((resolve, reject) => {
+		const timer = setInterval(async () => {
+			let successTag: HTMLCollectionOf<Element> | NodeListOf<Element>;
+			if (isNewLc) {
+				successTag = document.querySelectorAll(`[data-e2e-locator="submission-result"]`);
+			} else {
+				successTag = document.getElementsByClassName('marked_as_success');
+			}
+			if (successTag.length > 0) {
+				clearTimeout(timer);
+				resolve(successTag);
+			}
+		}, 1000);
+	});
+};
+
 (async () => {
-	let submitBtn: Element | null = null;
 	const isNewLc = isNewVersion();
 	try {
+		const successTag = await pullSuccessTag(isNewLc);
+		if (!successTag[0]) throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
+
+		let submissionId: string;
+
 		if (isNewLc) {
-			submitBtn = (
-				await getElementByQuerySelectorWithTimeout(`[data-e2e-locator="console-submit-button"]`)
-			)[0];
+			const postSolutionButton =
+				successTag[0].parentElement?.parentElement?.getElementsByTagName('a')[1];
+			if (!postSolutionButton) return;
+			const link = postSolutionButton.href;
+			const searchParams = new URL(link).searchParams;
+			submissionId = searchParams.get('submissionId')!;
 		} else {
-			submitBtn = (await getElementByQuerySelectorWithTimeout(`[data-cy="submit-code-btn"]`))[0];
+			const detailsElem = successTag[0].parentElement?.getElementsByTagName('a')[0];
+			if (!detailsElem) return;
+			const submissionLink = detailsElem.href;
+			const slashIndexes = [...submissionLink.matchAll(/\//g)];
+			submissionId = detailsElem.href.substring(
+				slashIndexes[slashIndexes.length - 2].index! + 1,
+				slashIndexes[slashIndexes.length - 1].index!
+			);
 		}
-	} catch (e) {}
 
-	if (!submitBtn) return;
+		console.log('submissionId', submissionId);
 
-	try {
-		submitBtn.addEventListener('click', async () => {
-			try {
-				let successTag: HTMLCollectionOf<Element> | NodeListOf<Element>;
-				if (isNewLc) {
-					successTag = await getElementByQuerySelectorWithTimeout(
-						`[data-e2e-locator="submission-result"]`
-					);
-				} else {
-					successTag = await getElementByClassNameWithTimeout('marked_as_success');
-				}
+		const submissionDetailsQuery = {
+			query: process.env.LC_QUERIES_GET_SUBMISSION_DETAILS,
+			variables: {
+				submissionId
+			},
+			operationName: 'submissionDetails'
+		};
 
-				if (!successTag[0])
-					throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
+		const submissionDetails: LC.SubmissionDetails = await fetchLC(submissionDetailsQuery);
 
-				let submissionId: string;
-
-				if (isNewLc) {
-					const postSolutionButton =
-						successTag[0].parentElement?.parentElement?.getElementsByTagName('a')[1];
-					if (!postSolutionButton) return;
-					const link = postSolutionButton.href;
-					const searchParams = new URL(link).searchParams;
-					submissionId = searchParams.get('submissionId')!;
-				} else {
-					const detailsElem = successTag[0].parentElement?.getElementsByTagName('a')[0];
-					if (!detailsElem) return;
-					const submissionLink = detailsElem.href;
-					const slashIndexes = [...submissionLink.matchAll(/\//g)];
-					submissionId = detailsElem.href.substring(
-						slashIndexes[slashIndexes.length - 2].index! + 1,
-						slashIndexes[slashIndexes.length - 1].index!
-					);
-				}
-
-				console.log('submissionId', submissionId);
-
-				const submissionDetailsQuery = {
-					query: process.env.LC_QUERIES_GET_SUBMISSION_DETAILS,
-					variables: {
-						submissionId
-					},
-					operationName: 'submissionDetails'
-				};
-
-				const submissionDetails: LC.SubmissionDetails = await fetchLC(submissionDetailsQuery);
-
-				await uploadCode(submissionDetails);
-			} catch (e) {
-				console.error(e);
-			}
-		});
+		await uploadCode(submissionDetails);
 	} catch (e) {
 		console.error(e);
 	}

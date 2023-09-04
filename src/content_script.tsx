@@ -70,7 +70,7 @@ const uploadCode = async (submissionDetails: LC.SubmissionDetails): Promise<void
 			code
 		},
 		question: {
-			questionNum: parseInt(question.questionId),
+			questionNum: parseInt(question.questionFrontendId),
 			questionTitle: question.title,
 			lang: lang.name,
 			content: question.content,

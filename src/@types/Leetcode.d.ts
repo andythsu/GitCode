@@ -68,6 +68,7 @@ export namespace LC {
 					titleSlug: string;
 					content: string;
 					difficulty: string;
+					questionFrontendId: string;
 				};
 				notes: string;
 				// topicTags: any[]; // not sure how to type this yet

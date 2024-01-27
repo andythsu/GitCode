@@ -41,7 +41,7 @@ export const getFromPageLocalStorage = async (
 export const isNewVersion = (): boolean => {
 	const scripts = document.scripts;
 	for (const script of scripts) {
-		if (script.id === 'chakra-script') {
+		if (script.id === '__NEXT_DATA__') {
 			return true;
 		}
 	}

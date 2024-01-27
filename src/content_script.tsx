@@ -123,15 +123,16 @@ const pullSuccessTag = (
 				successTag = document.getElementsByClassName('marked_as_success');
 			}
 			if (successTag.length > 0) {
-				clearTimeout(timer);
+				clearInterval(timer);
 				resolve(successTag);
 			}
 		}, 1000);
 	});
 };
 
-(async () => {
+async function main() {
 	const isNewLc = isNewVersion();
+	console.log(isNewLc ? 'LC is using new version' : 'LC is using old version');
 	try {
 		const successTag = await pullSuccessTag(isNewLc);
 		if (!successTag[0]) throw new Error(`successTag[0] is not found. SuccessTag: ${successTag}`);
@@ -139,12 +140,8 @@ const pullSuccessTag = (
 		let submissionId: string;
 
 		if (isNewLc) {
-			const postSolutionButton =
-				successTag[0].parentElement?.parentElement?.getElementsByTagName('a')[1];
-			if (!postSolutionButton) return;
-			const link = postSolutionButton.href;
-			const searchParams = new URL(link).searchParams;
-			submissionId = searchParams.get('submissionId')!;
+			const urlSplits = window.location.href.split('/');
+			submissionId = urlSplits[urlSplits.length - 2]; // submissionId will be in the second last position
 		} else {
 			const detailsElem = successTag[0].parentElement?.getElementsByTagName('a')[0];
 			if (!detailsElem) return;
@@ -171,5 +168,25 @@ const pullSuccessTag = (
 		await uploadCode(submissionDetails);
 	} catch (e) {
 		console.error(e);
+	} finally {
+		prevUrl = window.location.href;
+		global();
 	}
-})();
+}
+
+let prevUrl = '';
+
+function global() {
+	// need to wrap main() in an interval otherwise it will fail in SPA
+	const start = setInterval(() => {
+		const currentUrl = window.location.href;
+		console.log('currentUrl', currentUrl);
+		if (currentUrl != prevUrl) {
+			console.log('prevUrl', prevUrl);
+			clearInterval(start);
+			main();
+		}
+	}, 2000);
+}
+
+global();
